@@ -26,6 +26,7 @@ public class QuantityMeasurementApp {
     static class QuantityLength {
         private final double value;
         private final LengthUnit unit;
+        private static final double EPS = 1e-6;
 
         public QuantityLength(double value, LengthUnit unit) {
             if (!Double.isFinite(value)) {
@@ -42,11 +43,28 @@ public class QuantityMeasurementApp {
             return unit.toFeet(value);
         }
 
-        // Instance conversion
-        public QuantityLength convertTo(LengthUnit targetUnit) {
-            double base = this.toFeet();
-            double converted = targetUnit.fromFeet(base);
-            return new QuantityLength(converted, targetUnit);
+        // ===== ADD METHOD (Instance) =====
+        public QuantityLength add(QuantityLength other) {
+            if (other == null) {
+                throw new IllegalArgumentException("Second operand cannot be null");
+            }
+
+            double sumFeet = this.toFeet() + other.toFeet();
+            double result = this.unit.fromFeet(sumFeet);
+
+            return new QuantityLength(result, this.unit);
+        }
+
+        // ===== STATIC ADD (Overloaded) =====
+        public static QuantityLength add(QuantityLength q1, QuantityLength q2, LengthUnit targetUnit) {
+            if (q1 == null || q2 == null || targetUnit == null) {
+                throw new IllegalArgumentException("Invalid input");
+            }
+
+            double sumFeet = q1.toFeet() + q2.toFeet();
+            double result = targetUnit.fromFeet(sumFeet);
+
+            return new QuantityLength(result, targetUnit);
         }
 
         @Override
@@ -55,7 +73,7 @@ public class QuantityMeasurementApp {
             if (obj == null || getClass() != obj.getClass()) return false;
 
             QuantityLength other = (QuantityLength) obj;
-            return Math.abs(this.toFeet() - other.toFeet()) < 1e-6;
+            return Math.abs(this.toFeet() - other.toFeet()) < EPS;
         }
 
         @Override
@@ -64,42 +82,18 @@ public class QuantityMeasurementApp {
         }
     }
 
-    // ===== STATIC CONVERSION API =====
-    public static double convert(double value, LengthUnit source, LengthUnit target) {
-
-        if (!Double.isFinite(value)) {
-            throw new IllegalArgumentException("Value must be finite");
-        }
-        if (source == null || target == null) {
-            throw new IllegalArgumentException("Units cannot be null");
-        }
-
-        double inFeet = source.toFeet(value);
-        return target.fromFeet(inFeet);
-    }
-
-    // ===== DEMO METHODS (Overloading) =====
-    public static void demonstrateLengthConversion(double value,
-                                                   LengthUnit from,
-                                                   LengthUnit to) {
-        double result = convert(value, from, to);
-        System.out.println(value + " " + from + " = " + result + " " + to);
-    }
-
-    public static void demonstrateLengthConversion(QuantityLength q,
-                                                   LengthUnit to) {
-        System.out.println(q + " = " + q.convertTo(to));
-    }
-
     // ===== MAIN =====
     public static void main(String[] args) {
 
-        demonstrateLengthConversion(1.0, LengthUnit.FEET, LengthUnit.INCH);
-        demonstrateLengthConversion(3.0, LengthUnit.YARD, LengthUnit.FEET);
-        demonstrateLengthConversion(36.0, LengthUnit.INCH, LengthUnit.YARD);
-        demonstrateLengthConversion(1.0, LengthUnit.CENTIMETER, LengthUnit.INCH);
+        QuantityLength f1 = new QuantityLength(1.0, LengthUnit.FEET);
+        QuantityLength i1 = new QuantityLength(12.0, LengthUnit.INCH);
 
-        QuantityLength q = new QuantityLength(1.0, LengthUnit.YARD);
-        demonstrateLengthConversion(q, LengthUnit.INCH);
+        System.out.println(f1.add(i1)); // 2 FEET
+        System.out.println(i1.add(f1)); // 24 INCH
+
+        QuantityLength y = new QuantityLength(1.0, LengthUnit.YARD);
+        QuantityLength f = new QuantityLength(3.0, LengthUnit.FEET);
+
+        System.out.println(y.add(f)); // 2 YARD
     }
 }
