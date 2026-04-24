@@ -29,12 +29,11 @@ public class QuantityMeasurementApp {
         private static final double EPS = 1e-6;
 
         public QuantityLength(double value, LengthUnit unit) {
-            if (!Double.isFinite(value)) {
+            if (!Double.isFinite(value))
                 throw new IllegalArgumentException("Invalid value");
-            }
-            if (unit == null) {
+            if (unit == null)
                 throw new IllegalArgumentException("Unit cannot be null");
-            }
+
             this.value = value;
             this.unit = unit;
         }
@@ -43,26 +42,20 @@ public class QuantityMeasurementApp {
             return unit.toFeet(value);
         }
 
-        // ===== ADD METHOD (Instance) =====
+        // ===== UC6 method =====
         public QuantityLength add(QuantityLength other) {
-            if (other == null) {
-                throw new IllegalArgumentException("Second operand cannot be null");
-            }
-
-            double sumFeet = this.toFeet() + other.toFeet();
-            double result = this.unit.fromFeet(sumFeet);
-
-            return new QuantityLength(result, this.unit);
+            return add(other, this.unit);
         }
 
-        // ===== STATIC ADD (Overloaded) =====
-        public static QuantityLength add(QuantityLength q1, QuantityLength q2, LengthUnit targetUnit) {
-            if (q1 == null || q2 == null || targetUnit == null) {
-                throw new IllegalArgumentException("Invalid input");
-            }
+        // ===== UC7 method =====
+        public QuantityLength add(QuantityLength other, LengthUnit targetUnit) {
+            if (other == null)
+                throw new IllegalArgumentException("Second operand cannot be null");
+            if (targetUnit == null)
+                throw new IllegalArgumentException("Target unit cannot be null");
 
-            double sumFeet = q1.toFeet() + q2.toFeet();
-            double result = targetUnit.fromFeet(sumFeet);
+            double totalFeet = this.toFeet() + other.toFeet();
+            double result = targetUnit.fromFeet(totalFeet);
 
             return new QuantityLength(result, targetUnit);
         }
@@ -85,15 +78,11 @@ public class QuantityMeasurementApp {
     // ===== MAIN =====
     public static void main(String[] args) {
 
-        QuantityLength f1 = new QuantityLength(1.0, LengthUnit.FEET);
-        QuantityLength i1 = new QuantityLength(12.0, LengthUnit.INCH);
+        QuantityLength a = new QuantityLength(1.0, LengthUnit.FEET);
+        QuantityLength b = new QuantityLength(12.0, LengthUnit.INCH);
 
-        System.out.println(f1.add(i1)); // 2 FEET
-        System.out.println(i1.add(f1)); // 24 INCH
-
-        QuantityLength y = new QuantityLength(1.0, LengthUnit.YARD);
-        QuantityLength f = new QuantityLength(3.0, LengthUnit.FEET);
-
-        System.out.println(y.add(f)); // 2 YARD
+        System.out.println(a.add(b, LengthUnit.FEET));      // 2 FEET
+        System.out.println(a.add(b, LengthUnit.INCH));      // 24 INCH
+        System.out.println(a.add(b, LengthUnit.YARD));      // 0.6667 YARD
     }
 }
